@@ -1,0 +1,5 @@
+profile: service
+defaultPackage: greachconf.telegrambot
+---
+testFramework: junit
+sourceLanguage: java
