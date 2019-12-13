@@ -30,7 +30,6 @@ dependencies {
     compileOnly "org.graalvm.nativeimage:svm:$svmVersion"
 
     implementation platform("io.micronaut:micronaut-bom:$micronautVersion")
-    implementation "io.micronaut:micronaut-http-client"
     implementation "io.micronaut:micronaut-inject"
     implementation "io.micronaut:micronaut-validation"
     implementation "io.micronaut:micronaut-runtime"
@@ -40,11 +39,13 @@ dependencies {
     implementation("io.micronaut.aws:micronaut-function-aws-api-proxy") {
         exclude group: "com.fasterxml.jackson.module", module: "jackson-module-afterburner"
     }
-    implementation "io.micronaut:micronaut-http-server-netty"
     runtimeOnly "ch.qos.logback:logback-classic:1.2.3"
     testAnnotationProcessor platform("io.micronaut:micronaut-bom:$micronautVersion")
     testAnnotationProcessor "io.micronaut:micronaut-inject-java"
     testImplementation platform("io.micronaut:micronaut-bom:$micronautVersion")
+    testImplementation "io.micronaut:micronaut-http-client"
+    testImplementation "io.micronaut:micronaut-http-server-netty"
+
     testImplementation "io.micronaut:micronaut-inject"
     // Groovy beans
     testImplementation "io.micronaut:micronaut-inject-groovy"
