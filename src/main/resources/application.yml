@@ -5,7 +5,7 @@ micronaut:
 telegram:
   bots:
     greachconf:
-      token: '835392145:AAGIx4gJnygQ8hQhMLjunUEnkejYVjvs-Oo'
+      token: '${TELEGRAM_BOT_TOKEN}'
       commands:
         - 'speaker'
         - 'speakers'
