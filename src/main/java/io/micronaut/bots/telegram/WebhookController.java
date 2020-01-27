@@ -1,5 +1,6 @@
-package greachconf.telegrambot;
+package io.micronaut.bots.telegram;
 
+import io.micronaut.http.HttpResponse;
 import io.micronaut.http.annotation.Post;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -12,11 +13,28 @@ import org.slf4j.LoggerFactory;
 import io.micronaut.http.annotation.PathVariable;
 import io.micronaut.http.annotation.Body;
 import io.micronaut.http.annotation.Controller;
+
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Controller
 public class WebhookController {
     private static final Logger LOG = LoggerFactory.getLogger(WebhookController.class);
+
+    private final Map<String, TelegramBotConfiguration> configuration;
+    private final UpdateHandler updateHandler;
+
+    public WebhookController(Collection<TelegramBotConfiguration> telegramBotConfigurationCollection,
+                             UpdateHandler updateHandler) {
+        this.configuration = new HashMap<>();
+
+        for (TelegramBotConfiguration conf : telegramBotConfigurationCollection) {
+            this.configuration.put(conf.getToken(), conf);
+        }
+        this.updateHandler = updateHandler;
+    }
 
     @Operation(operationId = "telegramWebhook",
             summary = "receive webhook telegram updates",
@@ -32,19 +50,15 @@ public class WebhookController {
             }
     )
     @Post("/{token}")
-    public SendMessage update(@PathVariable String token,
-                         @Body Map<String, Object> update) {
-        SendMessage sendMessage = new SendMessage();
-        sendMessage.setMethod("sendMessage");
-        sendMessage.setText("haha");
-        if (update.containsKey("message") &&
-                update.get("message") instanceof Map &&
-                ((Map) update.get("message")).containsKey("chat") &&
-                ((Map) update.get("message")).get("chat") instanceof Map &&
-                ((Map) ((Map) update.get("message")).get("chat")).containsKey("id")) {
-            Object chatId = ((Map) ((Map) update.get("message")).get("chat")).get("id");
-            sendMessage.setChatId(chatId);
+    public HttpResponse update(@PathVariable String token,
+                               @Body Update update) {
+        if (!configuration.containsKey(token)) {
+            return HttpResponse.unauthorized();
         }
-        return sendMessage;
+        Optional<Send> opt = updateHandler.handUpdate(configuration.get(token), update);
+        if (!opt.isPresent()) {
+            return HttpResponse.ok();
+        }
+        return HttpResponse.ok(opt.get());
     }
 }

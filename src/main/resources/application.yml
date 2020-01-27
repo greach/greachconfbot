@@ -1,3 +1,11 @@
 micronaut:
   application:
     name: greachconf-telegrambot
+---
+telegram:
+  bots:
+    greachconf:
+      token: '835392145:AAGIx4gJnygQ8hQhMLjunUEnkejYVjvs-Oo'
+      commands:
+        - 'speaker'
+        - 'speakers'

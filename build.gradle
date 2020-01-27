@@ -5,8 +5,6 @@ plugins {
     id "groovy"
 }
 
-
-
 version "0.1"
 group "greachconf"
 
@@ -26,7 +24,6 @@ dependencies {
     annotationProcessor "io.micronaut:micronaut-inject-java"
     annotationProcessor "io.micronaut:micronaut-validation"
     annotationProcessor "io.micronaut.configuration:micronaut-openapi"
-
 
     compileOnly "org.graalvm.nativeimage:svm:$svmVersion"
 
