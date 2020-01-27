@@ -3,6 +3,9 @@ phases:
   install:
     runtime-versions:
       java: openjdk8
+  pre-build:
+    commands:
+      - $(aws ecr get-login --region $AWS_DEFAULT_REGION --no-include-email)
   build:
     commands:
       - ./gradlew build
