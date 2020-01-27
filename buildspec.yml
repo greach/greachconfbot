@@ -9,7 +9,9 @@ phases:
   build:
     commands:
       - ./gradlew build
-      - ./deploy.sh
+      - docker build -t $IMAGE_REPO_NAME:$IMAGE_TAG .
+#      - docker tag $IMAGE_REPO_NAME:$IMAGE_TAG $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
+      - docker run --rm --entrypoint cat $IMAGE_REPO_NAME:$IMAGE_TAG /home/application/function.zip > build/function.zip
   post_build:
     finally:
       - rm -f  /root/.gradle/caches/modules-2/modules-2.lock
