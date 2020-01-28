@@ -50,33 +50,18 @@ public class TalkCommandHandler extends AbstractCommandAndCallbackHandler {
     @Nonnull
     public Optional<List<Send>> compose(@Nonnull @NotBlank String chatId, @Nonnull @NotBlank String text) {
         String textWithoutCommand = cleanupCommand(text);
-        try {
-            Agenda agenda = this.agendaApi.fetchAgenda().blockingGet();
-            for (AgendaDay day : agenda.getDays()) {
-                for (AgendaTimeSlot agendaTimeSlot : day.getTimeSlots()) {
-                    if (agendaTimeSlot.getTrackTalks() != null) {
-                        for (AgendaTalk talk : agendaTimeSlot.getTrackTalks().values()) {
-                            if (textWithoutCommand.contains(talk.getUid())) {
-                                Optional<Send> sendOptional = composeWithTalkId(chatId, talk.getUid());
-                                if (sendOptional.isPresent()) {
-                                    return Optional.of(Collections.singletonList(sendOptional.get()));
-                                }
-                            }
-                        }
-                    }
-                }
-            }
 
-            SendMessage talkNotFoundMessage = new SendMessage();
-            talkNotFoundMessage.setText("Agenda day not found " + textWithoutCommand);
-            talkNotFoundMessage.setChatId(chatId);
-            return Optional.of(Collections.singletonList(talkNotFoundMessage));
-        } catch (HttpClientResponseException e) {
-            if (LOG.isErrorEnabled()) {
-                LOG.error("error fetching speakers", e);
-            }
+        Optional<Send> sendOptional = composeWithTalkId(chatId, textWithoutCommand);
+        if (sendOptional.isPresent()) {
+            return Optional.of(Collections.singletonList(sendOptional.get()));
         }
-        return Optional.empty();
+
+
+        SendMessage talkNotFoundMessage = new SendMessage();
+        talkNotFoundMessage.setText("talk not found " + textWithoutCommand);
+        talkNotFoundMessage.setChatId(chatId);
+        return Optional.of(Collections.singletonList(talkNotFoundMessage));
+
     }
 
     @Nonnull
