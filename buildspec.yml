@@ -9,6 +9,7 @@ phases:
   build:
     commands:
       - ./deploy.sh
+      - aws lambda update-function-code --function-name telegram-greachconfbot --zip-file build/function.zip --publish
   post_build:
     finally:
       - rm -f  /root/.gradle/caches/modules-2/modules-2.lock
