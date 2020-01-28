@@ -3,6 +3,7 @@ package greachconf.agenda;
 import io.micronaut.core.annotation.Introspected;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
 
@@ -12,7 +13,7 @@ public class AgendaTimeSlot implements Comparable<AgendaTimeSlot> {
     @Nonnull
     private TimeSlot timeSlot;
 
-    @Nonnull
+    @Nullable
     private Map<String, AgendaTalk> trackTalks;
 
     @Nonnull
@@ -44,12 +45,12 @@ public class AgendaTimeSlot implements Comparable<AgendaTimeSlot> {
         this.timeSlot = timeSlot;
     }
 
-    @Nonnull
+    @Nullable
     public Map<String, AgendaTalk> getTrackTalks() {
         return trackTalks;
     }
 
-    public void setTrackTalks(@Nonnull Map<String, AgendaTalk> trackTalks) {
+    public void setTrackTalks(@Nullable Map<String, AgendaTalk> trackTalks) {
         this.trackTalks = trackTalks;
     }
 
