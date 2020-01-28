@@ -50,8 +50,8 @@ public class DefaultUpdateHandler implements UpdateHandler {
         if (applicationContext.containsBean(TelegramBot.class, Qualifiers.byName(configuration.getName()))) {
             TelegramBot telegramBot = applicationContext.getBean(TelegramBot.class, Qualifiers.byName(configuration.getName()));
 
-//            SendMessage echo = echoUpdateMessage(objectMapper, update);
-//            telegramBot.sendMessage(echo).blockingGet();
+            SendMessage echo = echoUpdateMessage(objectMapper, update);
+            telegramBot.sendMessage(echo).blockingGet();
             if (update.getCallbackQuery() !=null) {
                 String text = update.getCallbackQuery().getData();
                 if (text != null) {
