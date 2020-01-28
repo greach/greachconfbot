@@ -54,11 +54,13 @@ public class TalkCommandHandler extends AbstractCommandAndCallbackHandler {
             Agenda agenda = this.agendaApi.fetchAgenda().blockingGet();
             for (AgendaDay day : agenda.getDays()) {
                 for (AgendaTimeSlot agendaTimeSlot : day.getTimeSlots()) {
-                    for (AgendaTalk talk : agendaTimeSlot.getTrackTalks().values()) {
-                        if (textWithoutCommand.contains(talk.getUid())) {
-                            Optional<Send> sendOptional = composeWithTalkId(chatId, talk.getUid());
-                            if (sendOptional.isPresent()) {
-                                return Optional.of(Collections.singletonList(sendOptional.get()));
+                    if (agendaTimeSlot.getTrackTalks() != null) {
+                        for (AgendaTalk talk : agendaTimeSlot.getTrackTalks().values()) {
+                            if (textWithoutCommand.contains(talk.getUid())) {
+                                Optional<Send> sendOptional = composeWithTalkId(chatId, talk.getUid());
+                                if (sendOptional.isPresent()) {
+                                    return Optional.of(Collections.singletonList(sendOptional.get()));
+                                }
                             }
                         }
                     }
