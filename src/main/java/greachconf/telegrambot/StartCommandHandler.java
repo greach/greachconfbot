@@ -23,7 +23,7 @@ import java.util.Optional;
 @Singleton
 public class StartCommandHandler implements CommandHandler {
     private static final Logger LOG = LoggerFactory.getLogger(StartCommandHandler.class);
-    public static final String COMMAND_START = "talk";
+    public static final String COMMAND_START = "start";
 
     @Nonnull
     @Override
