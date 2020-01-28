@@ -11,6 +11,8 @@ import io.micronaut.bots.telegram.Send;
 import io.micronaut.bots.telegram.SendMessage;
 import io.micronaut.bots.telegram.TelegramBotConfiguration;
 import io.micronaut.bots.telegram.Update;
+import io.micronaut.http.client.exceptions.HttpClientResponseException;
+import org.checkerframework.checker.nullness.Opt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,6 +20,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.inject.Named;
 import javax.inject.Singleton;
+import javax.swing.text.html.Option;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -62,22 +65,29 @@ public class SpeakersCommandHandler implements CommandHandler {
     @Nonnull
     public Optional<List<Send>> compose(@Nonnull @NotNull @Valid TelegramBotConfiguration configuration,
                                         @Nonnull @NotBlank String chatId) {
-        List<AgendaTalkSpeaker> speakers = this.agendaApi.fetchSpeakers().blockingGet();
-        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
-        List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
-        for (AgendaTalkSpeaker speaker : speakers) {
-            List<InlineKeyboardButton> speakerKeyboard = new ArrayList<>();
-            speakerKeyboard.add(buttonForSpeaker(speaker));
-            keyboard.add(speakerKeyboard);
-        }
-        inlineKeyboardMarkup.setInlineKeyboard(keyboard);
-        String json = serializeInlineKeyboardMarkup(inlineKeyboardMarkup);
-        SendMessage sendMessage = new SendMessage();
-        sendMessage.setChatId(chatId);
-        sendMessage.setText(GREACH_SPEAKERS);
-        sendMessage.setReplyMarkup(json);
+        try {
+            List<AgendaTalkSpeaker> speakers = this.agendaApi.fetchSpeakers().blockingGet();
+            InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
+            List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
+            for (AgendaTalkSpeaker speaker : speakers) {
+                List<InlineKeyboardButton> speakerKeyboard = new ArrayList<>();
+                speakerKeyboard.add(buttonForSpeaker(speaker));
+                keyboard.add(speakerKeyboard);
+            }
+            inlineKeyboardMarkup.setInlineKeyboard(keyboard);
+            String json = serializeInlineKeyboardMarkup(inlineKeyboardMarkup);
+            SendMessage sendMessage = new SendMessage();
+            sendMessage.setChatId(chatId);
+            sendMessage.setText(GREACH_SPEAKERS);
+            sendMessage.setReplyMarkup(json);
 
-        return Optional.of(Collections.singletonList(sendMessage));
+            return Optional.of(Collections.singletonList(sendMessage));
+        } catch (HttpClientResponseException e) {
+            if (LOG.isErrorEnabled()) {
+                LOG.error("error fetching speakers", e);
+            }
+        }
+        return Optional.empty();
     }
 
     @Nullable

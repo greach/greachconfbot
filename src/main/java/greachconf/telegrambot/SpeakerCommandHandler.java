@@ -9,6 +9,7 @@ import io.micronaut.bots.telegram.ParseMode;
 import io.micronaut.bots.telegram.Send;
 import io.micronaut.bots.telegram.SendMessage;
 import io.micronaut.bots.telegram.SendPhoto;
+import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,39 +43,52 @@ public class SpeakerCommandHandler extends AbstractCommandAndCallbackHandler {
     @Nonnull
     public Optional<List<Send>> compose(@Nonnull @NotBlank String chatId, @Nonnull @NotBlank String text) {
         String textWithoutCommand = cleanupCommand(text);
-        List<AgendaTalkSpeaker> agendaTalkSpeakerList = this.agendaApi.fetchSpeakers().blockingGet();
-        String selectedUid = null;
-        for (AgendaTalkSpeaker agendaTalkSpeaker : agendaTalkSpeakerList) {
-            if (textWithoutCommand.contains(agendaTalkSpeaker.getUid()) || textWithoutCommand.contains(agendaTalkSpeaker.getName())) {
-                selectedUid = agendaTalkSpeaker.getUid();
-                break;
+        try {
+            List<AgendaTalkSpeaker> agendaTalkSpeakerList = this.agendaApi.fetchSpeakers().blockingGet();
+            String selectedUid = null;
+            for (AgendaTalkSpeaker agendaTalkSpeaker : agendaTalkSpeakerList) {
+                if (textWithoutCommand.contains(agendaTalkSpeaker.getUid()) || textWithoutCommand.contains(agendaTalkSpeaker.getName())) {
+                    selectedUid = agendaTalkSpeaker.getUid();
+                    break;
+                }
             }
-        }
-        if (selectedUid != null) {
-            return Optional.of(messagesForSpeakerUid(chatId, selectedUid));
+            if (selectedUid != null) {
+                return messagesForSpeakerUid(chatId, selectedUid);
 
+            }
+        } catch(HttpClientResponseException e) {
+            if (LOG.isErrorEnabled()) {
+                LOG.error("error fetching speakers", e);
+            }
         }
         return Optional.empty();
     }
 
-    List<Send> messagesForSpeakerUid(String chatId, String speakerId) {
+    Optional<List<Send>> messagesForSpeakerUid(String chatId, String speakerId) {
         List<Send> l = new ArrayList<>();
-        Speaker speaker = this.agendaApi.fetchSpeakerById(speakerId).blockingGet();
+        try {
+            Speaker speaker = this.agendaApi.fetchSpeakerById(speakerId).blockingGet();
 
 
-        SendPhoto sendPhoto = new SendPhoto();
-        sendPhoto.setChatId(chatId);
-        sendPhoto.setCaption(speaker.getName());
-        sendPhoto.setPhoto(AgendaClient.GREACH_URL + speaker.getImage());
-        l.add(sendPhoto);
+            SendPhoto sendPhoto = new SendPhoto();
+            sendPhoto.setChatId(chatId);
+            sendPhoto.setCaption(speaker.getName());
+            sendPhoto.setPhoto(AgendaClient.GREACH_URL + speaker.getImage());
+            l.add(sendPhoto);
 
-        SendMessage sendMessage = new SendMessage();
-        sendMessage.setChatId(chatId);
-        sendMessage.setText(htmlForSpeaker(speaker));
-        sendMessage.setDisableWebPagePreview(true);
-        sendMessage.setParseMode(ParseMode.HTML.toString());
-        l.add(sendMessage);
-       return l;
+            SendMessage sendMessage = new SendMessage();
+            sendMessage.setChatId(chatId);
+            sendMessage.setText(htmlForSpeaker(speaker));
+            sendMessage.setDisableWebPagePreview(true);
+            sendMessage.setParseMode(ParseMode.HTML.toString());
+            l.add(sendMessage);
+            return Optional.of(l);
+        } catch(HttpClientResponseException e) {
+            if (LOG.isErrorEnabled()) {
+                LOG.error("error fetching speaker by id", e);
+            }
+        }
+        return Optional.empty();
     }
 
     private String htmlForSpeaker(Speaker speaker) {

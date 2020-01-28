@@ -11,6 +11,7 @@ import io.micronaut.bots.telegram.HtmlBuilder;
 import io.micronaut.bots.telegram.ParseMode;
 import io.micronaut.bots.telegram.Send;
 import io.micronaut.bots.telegram.SendMessage;
+import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,38 +50,52 @@ public class TalkCommandHandler extends AbstractCommandAndCallbackHandler {
     @Nonnull
     public Optional<List<Send>> compose(@Nonnull @NotBlank String chatId, @Nonnull @NotBlank String text) {
         String textWithoutCommand = cleanupCommand(text);
-        Agenda agenda = this.agendaApi.fetchAgenda().blockingGet();
-        for (AgendaDay day : agenda.getDays()) {
-            for (AgendaTimeSlot agendaTimeSlot : day.getTimeSlots()) {
-                for (AgendaTalk talk : agendaTimeSlot.getTrackTalks().values()) {
-                    if (textWithoutCommand.contains(talk.getUid())) {
-                        Optional<Send> sendOptional = composeWithTalkId(chatId, talk.getUid());
-                        if (sendOptional.isPresent()) {
-                            return Optional.of(Collections.singletonList(sendOptional.get()));
+        try {
+            Agenda agenda = this.agendaApi.fetchAgenda().blockingGet();
+            for (AgendaDay day : agenda.getDays()) {
+                for (AgendaTimeSlot agendaTimeSlot : day.getTimeSlots()) {
+                    for (AgendaTalk talk : agendaTimeSlot.getTrackTalks().values()) {
+                        if (textWithoutCommand.contains(talk.getUid())) {
+                            Optional<Send> sendOptional = composeWithTalkId(chatId, talk.getUid());
+                            if (sendOptional.isPresent()) {
+                                return Optional.of(Collections.singletonList(sendOptional.get()));
+                            }
                         }
                     }
                 }
             }
-        }
 
-        SendMessage talkNotFoundMessage = new SendMessage();
-        talkNotFoundMessage.setText("Agenda day not found " +  textWithoutCommand);
-        talkNotFoundMessage.setChatId(chatId);
-        return Optional.of(Collections.singletonList(talkNotFoundMessage));
+            SendMessage talkNotFoundMessage = new SendMessage();
+            talkNotFoundMessage.setText("Agenda day not found " + textWithoutCommand);
+            talkNotFoundMessage.setChatId(chatId);
+            return Optional.of(Collections.singletonList(talkNotFoundMessage));
+        } catch (HttpClientResponseException e) {
+            if (LOG.isErrorEnabled()) {
+                LOG.error("error fetching speakers", e);
+            }
+        }
+        return Optional.empty();
     }
 
     @Nonnull
     public Optional<Send> composeWithTalkId(@Nonnull @NotBlank String chatId, @Nonnull @NotBlank String talkId) {
-        Talk talk = this.agendaApi.fetchTalkById(talkId).blockingGet();
-        SendMessage sendMessage = new SendMessage();
-        sendMessage.setChatId(chatId);
-        sendMessage.setText(htmlForTalk(talk));
-        sendMessage.setDisableWebPagePreview(true);
-        sendMessage.setParseMode(ParseMode.HTML.toString());
-        sendMessage.setReplyMarkup(serializedInlineKeyboard(talk.getSpeakers().stream()
-                .map(it -> new KeyboardButton(it, SpeakerCommandHandler.COMMAND_PREFFIX + SpeakerCommandHandler.COMMAND_SPEAKER + " " + it))
-                .collect(Collectors.toList()), objectMapper, LOG));
-        return Optional.of(sendMessage);
+        try {
+            Talk talk = this.agendaApi.fetchTalkById(talkId).blockingGet();
+            SendMessage sendMessage = new SendMessage();
+            sendMessage.setChatId(chatId);
+            sendMessage.setText(htmlForTalk(talk));
+            sendMessage.setDisableWebPagePreview(true);
+            sendMessage.setParseMode(ParseMode.HTML.toString());
+            sendMessage.setReplyMarkup(serializedInlineKeyboard(talk.getSpeakers().stream()
+                    .map(it -> new KeyboardButton(it, SpeakerCommandHandler.COMMAND_PREFFIX + SpeakerCommandHandler.COMMAND_SPEAKER + " " + it))
+                    .collect(Collectors.toList()), objectMapper, LOG));
+            return Optional.of(sendMessage);
+        } catch (HttpClientResponseException e) {
+            if (LOG.isErrorEnabled()) {
+                LOG.error("error fetching speakers", e);
+            }
+        }
+        return Optional.empty();
     }
 
     private String htmlForTalk(Talk talk) {

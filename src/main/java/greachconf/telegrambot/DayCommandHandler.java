@@ -21,6 +21,7 @@ import io.micronaut.bots.telegram.Send;
 import io.micronaut.bots.telegram.SendMessage;
 import io.micronaut.bots.telegram.TelegramBotConfiguration;
 import io.micronaut.bots.telegram.Update;
+import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -90,70 +91,77 @@ public class DayCommandHandler implements CommandHandler, CallbackQueryHandler {
     }
 
     Optional<Send> sendMessageForDate(String chatId, LocalDate d) {
-        Agenda agenda = agendaApi.fetchAgenda().blockingGet();
+        try {
+            Agenda agenda = agendaApi.fetchAgenda().blockingGet();
 
-        for (AgendaDay day : agenda.getDays()) {
-            if (!d.isEqual(day.getDay())) {
-                continue;
-            }
+            for (AgendaDay day : agenda.getDays()) {
+                if (!d.isEqual(day.getDay())) {
+                    continue;
+                }
 
-            List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
+                List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
 
-            MarkdownV2Builder builder = new MarkdownV2Builder();
+                MarkdownV2Builder builder = new MarkdownV2Builder();
 
-            String formattedDate = day.getDay().format(DATE_FORMATTER);
-            builder.bold(formattedDate).newLine().newLine();
-            for (AgendaTimeSlot slot : day.getTimeSlots()) {
-                String timeText = slot.getTimeSlot().getStart().format(TIME_FORMATTER) + " - " + slot.getTimeSlot().getEnd().format(TIME_FORMATTER);
-                if (slot.getTrackTalks() != null) {
-                    for (String track : slot.getTrackTalks().keySet()) {
-                        AgendaTalk talk = slot.getTrackTalks().get(track);
-                        builder.text(timeText + " " + track + " ").newLine();
-                        builder.text(talk.getTitle()).newLine();
-                        builder.text(String.join(", ", talk.getSpeakers().stream().map(AgendaTalkSpeaker::getName).collect(Collectors.toList())));
-                        builder.newLine();
-                        builder.newLine();
+                String formattedDate = day.getDay().format(DATE_FORMATTER);
+                builder.bold(formattedDate).newLine().newLine();
+                for (AgendaTimeSlot slot : day.getTimeSlots()) {
+                    String timeText = slot.getTimeSlot().getStart().format(TIME_FORMATTER) + " - " + slot.getTimeSlot().getEnd().format(TIME_FORMATTER);
+                    if (slot.getTrackTalks() != null) {
+                        for (String track : slot.getTrackTalks().keySet()) {
+                            AgendaTalk talk = slot.getTrackTalks().get(track);
+                            builder.text(timeText + " " + track + " ").newLine();
+                            builder.text(talk.getTitle()).newLine();
+                            builder.text(String.join(", ", talk.getSpeakers().stream().map(AgendaTalkSpeaker::getName).collect(Collectors.toList())));
+                            builder.newLine();
+                            builder.newLine();
 
-                        InlineKeyboardButton btn = new InlineKeyboardButton();
-                        btn.setCallbackData(TalkCommandHandler.COMMAND_PREFFIX + TalkCommandHandler.COMMAND_TALK + " " + talk.getUid());
-                        btn.setText(talk.getTitle());
-                        keyboard.add(Collections.singletonList(btn));
+                            InlineKeyboardButton btn = new InlineKeyboardButton();
+                            btn.setCallbackData(TalkCommandHandler.COMMAND_PREFFIX + TalkCommandHandler.COMMAND_TALK + " " + talk.getUid());
+                            btn.setText(talk.getTitle());
+                            keyboard.add(Collections.singletonList(btn));
 
 
+                        }
+                    }
+                    if (slot.getItems() != null) {
+                        for (AgendaItem item : slot.getItems()) {
+                            builder.text(timeText + " " +  item.getTitle());
+                            builder.newLine();
+                            builder.newLine();
+
+                        }
                     }
                 }
-                if (slot.getItems() != null) {
-                    for (AgendaItem item : slot.getItems()) {
-                        builder.text(timeText + " " +  item.getTitle());
-                        builder.newLine();
-                        builder.newLine();
+                builder.newLine();
+                builder.newLine();
+                builder.newLine();
 
-                    }
-                }
+
+
+                SendMessage keyboardMessage = new SendMessage();
+                keyboardMessage.setChatId(chatId);
+                keyboardMessage.setText(builder.build());
+                keyboardMessage.setParseMode(ParseMode.MARKDOWN.toString());
+
+                InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
+                inlineKeyboardMarkup.setInlineKeyboard(keyboard);
+                String json = serializeInlineKeyboardMarkup(inlineKeyboardMarkup, objectMapper, LOG);
+                keyboardMessage.setReplyMarkup(json);
+
+                return Optional.of(keyboardMessage);
             }
-            builder.newLine();
-            builder.newLine();
-            builder.newLine();
 
-
-
-            SendMessage keyboardMessage = new SendMessage();
-            keyboardMessage.setChatId(chatId);
-            keyboardMessage.setText(builder.build());
-            keyboardMessage.setParseMode(ParseMode.MARKDOWN.toString());
-
-            InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
-            inlineKeyboardMarkup.setInlineKeyboard(keyboard);
-            String json = serializeInlineKeyboardMarkup(inlineKeyboardMarkup, objectMapper, LOG);
-            keyboardMessage.setReplyMarkup(json);
-
-            return Optional.of(keyboardMessage);
+            SendMessage dayNotFoundMessage = new SendMessage();
+            dayNotFoundMessage.setText("Agenda day not found " +  DATE_FORMATTER.format(d));
+            dayNotFoundMessage.setChatId(chatId);
+            return Optional.of(dayNotFoundMessage);
+        } catch(HttpClientResponseException e) {
+            if (LOG.isErrorEnabled()) {
+                LOG.error("error fetching speakers", e);
+            }
         }
-
-        SendMessage dayNotFoundMessage = new SendMessage();
-        dayNotFoundMessage.setText("Agenda day not found " +  DATE_FORMATTER.format(d));
-        dayNotFoundMessage.setChatId(chatId);
-        return Optional.of(dayNotFoundMessage);
+        return Optional.empty();
     }
 
     @Override
