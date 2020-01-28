@@ -50,8 +50,6 @@ public class DefaultUpdateHandler implements UpdateHandler {
         if (applicationContext.containsBean(TelegramBot.class, Qualifiers.byName(configuration.getName()))) {
             TelegramBot telegramBot = applicationContext.getBean(TelegramBot.class, Qualifiers.byName(configuration.getName()));
 
-            SendMessage echo = echoUpdateMessage(objectMapper, update);
-            telegramBot.sendMessage(echo).blockingGet();
             if (update.getCallbackQuery() !=null) {
                 String text = update.getCallbackQuery().getData();
                 if (text != null) {
@@ -62,13 +60,6 @@ public class DefaultUpdateHandler implements UpdateHandler {
                                 Optional<CallbackQueryResponse> callbackQueryResponseOptional = commandHandler.handle(configuration, update.getCallbackQuery());
                                 if (callbackQueryResponseOptional.isPresent()) {
                                     CallbackQueryResponse callbackQueryResponse = callbackQueryResponseOptional.get();
-
-//                                    try {
-//                                        echo.setText(objectMapper.writeValueAsString(callbackQueryResponse));
-//                                        telegramBot.sendMessage(echo).blockingGet();
-//                                    } catch (JsonProcessingException e) {
-//                                        e.printStackTrace();
-//                                    }
 
                                     telegramBot.answerCallbackQuery(callbackQueryResponse.getAnswerCallbackQuery());
                                     if (callbackQueryResponse.getMessages() != null) {
@@ -110,21 +101,7 @@ public class DefaultUpdateHandler implements UpdateHandler {
             }
         }
     }
-
-    @Nullable
-    public static SendMessage echoUpdateMessage(ObjectMapper objectMapper, Update update) {
-        SendMessage sendMessage = new SendMessage();
-        String chatId = "718074279";
-        sendMessage.setChatId(chatId);
-        try {
-            sendMessage.setText(objectMapper.writeValueAsString(update));
-            return sendMessage;
-        } catch (JsonProcessingException ex) {
-            ex.printStackTrace();
-        }
-        return null;
-    }
-
+    
     @Nullable
     private SendMessage errorMessage(Send input, HttpClientResponseException e) {
         SendMessage sendMessage = new SendMessage();
