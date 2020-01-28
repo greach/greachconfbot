@@ -8,6 +8,6 @@ import java.util.Optional;
 public interface UpdateHandler {
 
     @Nonnull
-    Optional<Send> handUpdate(@Nonnull @NotNull @Valid TelegramBotConfiguration configuration,
-                              @Nonnull @NotNull @Valid Update update);
+    Optional<Send> handleUpdate(@Nonnull @NotNull @Valid TelegramBotConfiguration configuration,
+                                @Nonnull @NotNull @Valid Update update);
 }

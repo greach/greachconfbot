@@ -1,6 +1,7 @@
 package greachconf.agenda;
 
 import io.micronaut.http.annotation.Get;
+import io.micronaut.http.annotation.PathVariable;
 import io.micronaut.http.client.annotation.Client;
 import io.reactivex.Single;
 
@@ -22,6 +23,10 @@ public interface AgendaClient extends AgendaApi {
 
     @Override
     @Get("/api/speaker/{id}.json")
-    Single<Speaker> fetchSpeakerById(@Nonnull @NotBlank String id);
+    Single<Speaker> fetchSpeakerById(@PathVariable  @Nonnull @NotBlank String id);
+
+    @Override
+    @Get("/api/talk/{id}.json")
+    Single<Talk> fetchTalkById(@PathVariable @Nonnull @NotBlank String id);
 
 }

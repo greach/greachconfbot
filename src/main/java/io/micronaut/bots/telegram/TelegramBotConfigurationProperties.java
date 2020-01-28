@@ -61,12 +61,7 @@ public class TelegramBotConfigurationProperties implements TelegramBotConfigurat
     @Override
     @Nonnull
     public List<String> getCommands() {
-        return commands.stream().sorted((o1, o2) -> {
-            if (o1.length() == o2.length()) {
-                return 0;
-            }
-            return o2.length() > o1.length() ? 1 : -1;
-        }).collect(Collectors.toList());
+        return commands;
     }
 
     public void setCommands(@Nonnull List<String> commands) {

@@ -1,5 +1,6 @@
 package io.micronaut.bots.telegram;
 
+import io.micronaut.http.HttpResponse;
 import io.micronaut.http.annotation.Body;
 import io.micronaut.http.annotation.Get;
 import io.micronaut.http.annotation.PathVariable;
@@ -74,4 +75,10 @@ public interface TelegramClient extends TelegramApi {
     @Get("/bot{token}/getUserProfilePhotos")
     Single<UserProfilePhotos> getUserProfilePhotos(@PathVariable @Nonnull @NotBlank String token,
                                                    @Nonnull @NotNull @Valid GetUserProfilePhotos getUserProfilePhotos);
+
+
+    @Override
+    @Post("/bot{token}/answerCallbackQuery")
+    Single<HttpResponse> answerCallbackQuery(@PathVariable @Nonnull @NotBlank String token,
+                                             @Body @Nonnull @NotNull @Valid AnswerCallbackQuery answerCallbackQuery);
 }

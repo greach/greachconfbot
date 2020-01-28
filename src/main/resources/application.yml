@@ -5,7 +5,14 @@ micronaut:
 telegram:
   bots:
     greachconf:
-      token: '${TELEGRAM_BOT_TOKEN}'
+      token: ${TELEGRAM_BOT_TOKEN}
       commands:
+        - 'day'
+        - 'help'
+        - 'next'
+        - 'talk'
+        - 'start'
+        - 'venue'
+        - 'agenda'
         - 'speaker'
         - 'speakers'

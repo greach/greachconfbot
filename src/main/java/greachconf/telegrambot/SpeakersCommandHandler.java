@@ -32,6 +32,7 @@ public class SpeakersCommandHandler implements CommandHandler {
     public static final String COMMAND_SPEAKERS = "speakers";
     private static final Logger LOG = LoggerFactory.getLogger(SpeakersCommandHandler.class);
     public static final String SPEAKERS_MSG = "/speakers";
+    public static final String GREACH_SPEAKERS = "Greach speakers:";
 
     private final ObjectMapper objectMapper;
     private final AgendaApi agendaApi;
@@ -73,7 +74,7 @@ public class SpeakersCommandHandler implements CommandHandler {
         String json = serializeInlineKeyboardMarkup(inlineKeyboardMarkup);
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(chatId);
-        sendMessage.setText(SPEAKERS_MSG);
+        sendMessage.setText(GREACH_SPEAKERS);
         sendMessage.setReplyMarkup(json);
 
         return Optional.of(Collections.singletonList(sendMessage));
@@ -87,14 +88,13 @@ public class SpeakersCommandHandler implements CommandHandler {
             if (LOG.isErrorEnabled()) {
                 LOG.error("error generating serialized JSON of inlineKeyboard", e);
             }
-            e.printStackTrace();
         }
         return null;
     }
 
     private InlineKeyboardButton buttonForSpeaker(AgendaTalkSpeaker speaker) {
         InlineKeyboardButton btn = new InlineKeyboardButton();
-        btn.setCallbackData(speaker.getUid());
+        btn.setCallbackData(SpeakerCommandHandler.COMMAND_PREFFIX + SpeakerCommandHandler.COMMAND_SPEAKER + " " + speaker.getUid());
         btn.setText(speaker.getName());
         return btn;
     }

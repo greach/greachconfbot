@@ -1,5 +1,6 @@
 package io.micronaut.bots.telegram;
 
+import io.micronaut.http.HttpResponse;
 import io.micronaut.http.annotation.Body;
 import io.micronaut.http.annotation.PathVariable;
 import io.micronaut.http.annotation.Post;
@@ -28,7 +29,6 @@ public class TelegramBot {
     }
 
     public Single<MessageSent> sendMessage(@Nonnull @NotNull @Valid SendMessage sendMessage) {
-
         return this.telegramApi.sendMessage(token, sendMessage);
     }
 
@@ -68,8 +68,12 @@ public class TelegramBot {
         return this.telegramApi.sendContact(token, sendContact);
     }
 
-    public Single<MessageSent> sendPoll(@Body @Nonnull @NotNull @Valid SendPoll sendPoll) {
+    public Single<MessageSent> sendPoll(@Nonnull @NotNull @Valid SendPoll sendPoll) {
         return this.telegramApi.sendPoll(token, sendPoll);
+    }
+
+    public Single<HttpResponse> answerCallbackQuery(@Nonnull @NotNull @Valid AnswerCallbackQuery answerCallbackQuery) {
+        return this.telegramApi.answerCallbackQuery(token, answerCallbackQuery);
     }
 
     public Single<UserProfilePhotos> getUserProfilePhotos(@Nonnull @NotNull @Valid GetUserProfilePhotos getUserProfilePhotos) {

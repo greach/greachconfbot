@@ -1,5 +1,6 @@
 package io.micronaut.bots.telegram;
 
+import io.micronaut.http.HttpResponse;
 import io.micronaut.http.annotation.Body;
 import io.micronaut.http.annotation.PathVariable;
 import io.reactivex.Single;
@@ -62,5 +63,10 @@ public interface TelegramApi {
      * @return The sent Message
      */
     Single<UserProfilePhotos> getUserProfilePhotos(@PathVariable @Nonnull @NotBlank String token,
-                                                   @Nonnull @NotNull @Valid GetUserProfilePhotos getUserProfilePhotos);
+                                                   @Body @Nonnull @NotNull @Valid GetUserProfilePhotos getUserProfilePhotos);
+
+
+    Single<HttpResponse> answerCallbackQuery(@PathVariable @Nonnull @NotBlank String token,
+                                             @Body @Nonnull @NotNull @Valid AnswerCallbackQuery answerCallbackQuery);
+
 }

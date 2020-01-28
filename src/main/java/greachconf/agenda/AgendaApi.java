@@ -1,5 +1,7 @@
 package greachconf.agenda;
 
+import io.micronaut.http.annotation.PathVariable;
+import io.reactivex.Completable;
 import io.reactivex.Single;
 
 import javax.annotation.Nonnull;
@@ -11,5 +13,7 @@ public interface AgendaApi {
 
     Single<List<AgendaTalkSpeaker>> fetchSpeakers();
 
-    Single<Speaker> fetchSpeakerById(@Nonnull @NotBlank String id);
+    Single<Speaker> fetchSpeakerById(@PathVariable  @Nonnull @NotBlank String id);
+
+    Single<Talk> fetchTalkById(@PathVariable @Nonnull @NotBlank String id);
 }

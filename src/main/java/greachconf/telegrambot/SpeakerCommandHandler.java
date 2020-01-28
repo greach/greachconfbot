@@ -6,26 +6,24 @@ import greachconf.agenda.AgendaTalkSpeaker;
 import greachconf.agenda.Speaker;
 import io.micronaut.bots.telegram.HtmlBuilder;
 import io.micronaut.bots.telegram.ParseMode;
-import io.micronaut.bots.telegram.CommandHandler;
 import io.micronaut.bots.telegram.Send;
 import io.micronaut.bots.telegram.SendMessage;
 import io.micronaut.bots.telegram.SendPhoto;
-import io.micronaut.bots.telegram.TelegramBotConfiguration;
-import io.micronaut.bots.telegram.Update;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.inject.Named;
 import javax.inject.Singleton;
-import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Named(SpeakerCommandHandler.COMMAND_SPEAKER)
 @Singleton
-public class SpeakerCommandHandler implements CommandHandler {
+public class SpeakerCommandHandler extends AbstractCommandAndCallbackHandler {
+    private static final Logger LOG = LoggerFactory.getLogger(SpeakerCommandHandler.class);
 
     public static final String COMMAND_SPEAKER = "speaker";
     private final AgendaApi agendaApi;
@@ -40,21 +38,7 @@ public class SpeakerCommandHandler implements CommandHandler {
         return COMMAND_SPEAKER;
     }
 
-    @Nonnull
     @Override
-    public Optional<List<Send>> compose(@Nonnull @NotNull @Valid TelegramBotConfiguration configuration,
-                                        @Nonnull @NotNull @Valid Update update) {
-        if (update.getMessage() == null) {
-            return Optional.empty();
-        }
-        String text = update.getMessage().getText();
-        if (text == null) {
-            return Optional.empty();
-        }
-        Integer chatId = update.getMessage().getChat().getId();
-        return compose(String.valueOf(chatId), text);
-    }
-
     @Nonnull
     public Optional<List<Send>> compose(@Nonnull @NotBlank String chatId, @Nonnull @NotBlank String text) {
         String textWithoutCommand = cleanupCommand(text);
@@ -102,5 +86,4 @@ public class SpeakerCommandHandler implements CommandHandler {
         }
         return builder.build();
     }
-
 }

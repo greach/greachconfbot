@@ -1,5 +1,6 @@
 package io.micronaut.bots.telegram;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.annotation.Post;
 import io.swagger.v3.oas.annotations.Operation;
@@ -25,9 +26,12 @@ public class WebhookController {
 
     private final Map<String, TelegramBotConfiguration> configuration;
     private final UpdateHandler updateHandler;
+    private final ObjectMapper objectMapper;
 
     public WebhookController(Collection<TelegramBotConfiguration> telegramBotConfigurationCollection,
-                             UpdateHandler updateHandler) {
+                             UpdateHandler updateHandler,
+                             ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
         this.configuration = new HashMap<>();
 
         for (TelegramBotConfiguration conf : telegramBotConfigurationCollection) {
@@ -55,7 +59,8 @@ public class WebhookController {
         if (!configuration.containsKey(token)) {
             return HttpResponse.unauthorized();
         }
-        Optional<Send> opt = updateHandler.handUpdate(configuration.get(token), update);
+        Optional<Send> opt = updateHandler.handleUpdate(configuration.get(token), update);
+
         if (!opt.isPresent()) {
             return HttpResponse.ok();
         }
