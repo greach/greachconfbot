@@ -42,7 +42,7 @@ public class SpeakerCommandHandler implements CommandHandler {
         try {
 
             Optional<String> textOptional = messageParser.parseText(update);
-            if (textOptional.isEmpty()) {
+            if (!textOptional.isPresent()) {
                 if (LOG.isInfoEnabled()) {
                     LOG.info("text parsed is empty");
                 }

@@ -41,7 +41,7 @@ public class TalkCommandHandler implements CommandHandler {
                                                              @NonNull ChatBotMessageReceive messageReceive) {
 
         Optional<String> textOptional = messageParser.parseText(messageReceive);
-        if (textOptional.isEmpty()) {
+        if (!textOptional.isPresent()) {
             if (LOG.isInfoEnabled()) {
                 LOG.info("parsed text is empty");
             }

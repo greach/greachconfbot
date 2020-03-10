@@ -43,7 +43,7 @@ public class DayCommandHandler implements CommandHandler {
     public <T extends ChatBotMessageSend> Optional<T> handle(@NonNull ChatBot chatBot, @NonNull ChatBotMessageReceive update) {
 
         Optional<String> textOptional = messageParser.parseText(update);
-        if (textOptional.isEmpty()) {
+        if (!textOptional.isPresent()) {
             if (LOG.isInfoEnabled()) {
                 LOG.info("text parsed is empty");
             }
