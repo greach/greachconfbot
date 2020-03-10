@@ -1,7 +1,7 @@
 FROM gradle:6.2.2-jdk8 as builder
 COPY --chown=gradle:gradle . /home/application
 WORKDIR /home/application
-RUN gradle build --no-daemon
+RUN ./gradlew build --no-daemon
 
 FROM amazonlinux:2018.03.0.20191014.0 as graalvm
 
