@@ -1,4 +1,4 @@
-FROM gradle:5.3-jdk-alpine as builder
+FROM gradle:6.2.2-jdk8 as builder
 COPY --chown=gradle:gradle . /home/application
 WORKDIR /home/application
 RUN gradle build --no-daemon
