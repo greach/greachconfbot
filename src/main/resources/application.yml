@@ -6,13 +6,14 @@ telegram:
   bots:
     greachconf:
       token: ${TELEGRAM_BOT_TOKEN}
-      commands:
-        - 'day'
-        - 'help'
-        - 'next'
-        - 'talk'
-        - 'start'
-        - 'venue'
-        - 'agenda'
-        - 'speaker'
-        - 'speakers'
+      at-username: '@ForeignExchangeRates'
+---
+telegram:
+  bots:
+    commands:
+      about:
+        parse-mode: 'Markdown'
+        path: 'classpath:about.md'
+      help:
+        parse-mode: 'Markdown'
+        path: 'classpath:help.md'

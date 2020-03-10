@@ -23,4 +23,15 @@ public class HtmlBuilder {
         html += text;
         return this;
     }
+
+    public static String cleanupUnsupportedHtmlTags(String text) {
+        String result = text;
+        for (String tag : HtmlStyle.HTML_TAGS) {
+            if (HtmlStyle.TELEGRAM_SUPPORTED_TAGS.contains(tag)) {
+                continue;
+            }
+            result = result.replaceAll("<" + tag + ">", "").replaceAll("</" + tag + ">", "");
+        }
+        return result;
+    }
 }
