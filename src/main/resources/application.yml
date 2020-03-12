@@ -6,7 +6,7 @@ telegram:
   bots:
     greachconf:
       token: ${TELEGRAM_BOT_TOKEN}
-      at-username: '@ForeignExchangeRates'
+      at-username: '@GreachConfBot'
 ---
 telegram:
   bots:
@@ -17,3 +17,4 @@ telegram:
       help:
         parse-mode: 'Markdown'
         path: 'classpath:help.md'
+

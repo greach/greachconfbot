@@ -1,4 +1,4 @@
-I can can help you get the most out of Greach Conference
+I can help you get the most out of Greach Conference
 You can control me by sending these commands:
 
 /speakers - list of speakers
